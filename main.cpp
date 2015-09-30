@@ -1,12 +1,14 @@
 // g++ playingWithFnPtrs.cpp -o playingWithFnPtrs -std=c++11 -Wall -O3
 
 #include <iostream>
-#include <chrono>
 using std::cout;
 using std::endl;
+#include <chrono>
+#include "dvrgArithNode.hpp"
 
-typedef float num;
+
 typedef num (*op)(num, num);
+
 num _add(num a, num b) {return a + b;}
 num _sub(num a, num b) {return a - b;}
 num _mul(num a, num b) {return a * b;}
@@ -24,7 +26,10 @@ num everyFn(switch_op op, num a, num b) {
 }
 
 
-int main(int argc, char const *argv[]) {
+
+
+
+int main(int argc, char const *argv) {
   long dataSize = 1e6;
   num data[dataSize];
   cout << "dataSize: " << dataSize << endl;
@@ -54,7 +59,7 @@ int main(int argc, char const *argv[]) {
   
   //every fn ptr per iteration
   {
-    //the condition is here to prevent the compiler from inlining the fn ptrs
+    //the condition is here to prevent the compiler from inlining
     const op opAdd = argc > 1000 ? _sub : _add;
     const op opSub = argc > 1000 ? _mul : _sub;
     const op opMul = argc > 1000 ? _div : _mul;
