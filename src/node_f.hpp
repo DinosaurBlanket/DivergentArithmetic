@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "num.h"
-typedef unsigned int uint;
 
 #define LOG_NODE_CONSTR_DESTR false
 

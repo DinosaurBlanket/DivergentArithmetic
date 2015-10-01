@@ -4,7 +4,8 @@
 using std::cout;
 using std::endl;
 #include <chrono>
-#include "node.hpp"
+#include "node_f.hpp"
+#include "node_s.hpp"
 
 
 typedef num (*op)(num, num);
@@ -58,7 +59,7 @@ int main(int argc, char const **argv) {
   
   //every fn ptr per iteration
   {
-    //the condition is here to prevent the compiler from inlining
+    //the conditions are to prevent the compiler from inlining
     const op opAdd = argc > 1000 ? _sub : _add;
     const op opSub = argc > 1000 ? _mul : _sub;
     const op opMul = argc > 1000 ? _div : _mul;
@@ -112,9 +113,8 @@ int main(int argc, char const **argv) {
   }
   _checkData
   
-  //node
+  //node_f
   {
-    //data[i] = _add(90, _sub(12, _div(8, _mul(2, 2))));
     std::vector<node> mulArgs = {node( 2), node(2)};
     node muln = node(nf_mul, mulArgs);
     std::vector<node> divArgs = {node( 8), muln};
@@ -126,7 +126,27 @@ int main(int argc, char const **argv) {
     auto start_time = std::chrono::high_resolution_clock::now();
     addn.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "nodes: " <<
+    cout << "node_f: " <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds" << endl;
+  }
+  _checkData
+  
+  //node_s
+  {
+    std::vector<node_s> mulArgs = {node_s( 2), node_s(2)};
+    node_s muln = node_s(ni_mul, mulArgs);
+    std::vector<node_s> divArgs = {node_s( 8), muln};
+    node_s divn = node_s(ni_div, divArgs);
+    std::vector<node_s> subArgs = {node_s(12), divn};
+    node_s subn = node_s(ni_sub, subArgs);
+    std::vector<node_s> addArgs = {node_s(90), subn};
+    node_s addn = node_s(ni_add, addArgs);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    addn.outputTo(data, dataSize);
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    cout << "node_s: " <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;

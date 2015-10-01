@@ -1,6 +1,6 @@
 
 
-#include "node.hpp"
+#include "node_f.hpp"
 #include <cstring>
 
 #if LOG_NODE_CONSTR_DESTR
@@ -20,12 +20,12 @@ void node::outputTo(num *destData, uint destDataSize) {
   uint i = 0;
   for (; i+chunkSize <= destDataSize; i += chunkSize) {
     dummyNode.inputData = &destData[i];
-    dummyNode.output(nullptr, 0, i);
+    this->output(&dummyNode, 0, i);
   }
   dummyNode.inputData = dummyNodesData;
   uint remainder = destDataSize % chunkSize;
   if (remainder) {
-    dummyNode.output(nullptr, 0, i);
+    this->output(&dummyNode, 0, i);
     std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
