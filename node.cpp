@@ -8,8 +8,8 @@ using std::endl;
 
 const uint chunkSize = 256;
 
-void outputTo(node &root, num *destData, uint destDataSize) {
-  node dummyNode = node(nf_dummy, &root, 1);cout << "dummy: " << &dummyNode << endl;
+void node::outputTo(num *destData, uint destDataSize) {
+  node dummyNode = node(nf_dummy, this, 1);cout << "dummy: " << &dummyNode << endl;
   num *dummyNodesData = dummyNode.inputData;
   uint i = 0;
   for (; i+chunkSize < destDataSize; i += chunkSize) {
@@ -23,8 +23,8 @@ void outputTo(node &root, num *destData, uint destDataSize) {
     std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
-void outputTo(node &root, std::vector<num> &destData) {
-  outputTo(root, destData.data(), destData.size());
+void node::outputTo(std::vector<num> &destData) {
+  outputTo(destData.data(), destData.size());
 }
 
 node::node(num literal) :

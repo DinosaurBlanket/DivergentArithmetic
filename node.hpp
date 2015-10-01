@@ -23,10 +23,10 @@ struct node {
   node(const node &n);
   ~node();
   void output(node *dest, uint destOffset, uint globalIndexOffset);
+  void outputTo(num *destData, uint destDataSize);
+  void outputTo(std::vector<num> &destData);
 };
 
-void outputTo(node &root, num *destData, uint destDataSize);
-void outputTo(node &root, std::vector<num> &destData);
 
 void nf_add(_nodeFuncParams);
 void nf_mul(_nodeFuncParams);

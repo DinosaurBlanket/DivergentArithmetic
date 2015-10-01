@@ -39,7 +39,7 @@ int main(int argc, char const **argv) {
   
   vector<num> data;
   data.resize(1000, 0);
-  outputTo(root, data);
+  root.outputTo(data);
   
   const uint pitch = 10;
   for (uint i = 0; i < data.size(); i++) {
