@@ -11,21 +11,21 @@ using std::vector;
 int main(int argc, char const **argv) {
   
   // this does not work
-  node litA = node(2);cout << "litA : " << &litA << endl;
-  node litB = node(1);cout << "litB : " << &litB << endl;
-  vector<node> addArgs = {litA, litB};
-  node adder = node(nf_add, addArgs);cout << "adder: " << &adder << endl;
-  node globalIndexNode = node(nf_globalIndex);cout << "GIN  : " << &adder << endl;
-  vector<node> mulArgs = {adder, globalIndexNode};
-  node root = node(nf_mul, mulArgs);cout << "root : " << &root << endl;
+  //node litA = node(2);cout << "litA : " << &litA << endl;
+  //node litB = node(1);cout << "litB : " << &litB << endl;
+  //vector<node> addArgs = {litA, litB};
+  //node adder = node(nf_add, addArgs);cout << "adder: " << &adder << endl;
+  //node globalIndexNode = node(nf_globalIndex);cout << "GIN  : " << &adder << endl;
+  //vector<node> mulArgs = {adder, globalIndexNode};
+  //node root = node(nf_mul, mulArgs);cout << "root : " << &root << endl;
   
   
   // this works
-  //vector<node> addArgs = {node(1), node(2)};
-  //node adder = node(nf_add, addArgs);cout << "adder: " << &adder << endl;
-  //node globalIndexNode = node(nf_globalIndex);cout << "GIN  : " << &adder << endl;
-  //vector<node> mulArgs = {node(nf_add, &addArgs[0], 2), node(nf_globalIndex)};
-  //node root = node(nf_mul, mulArgs);cout << "root : " << &root << endl;
+  vector<node> addArgs = {node(1), node(2)};
+  node adder = node(nf_add, addArgs);cout << "adder: " << &adder << endl;
+  node globalIndexNode = node(nf_globalIndex);cout << "GIN  : " << &adder << endl;
+  vector<node> mulArgs = {node(nf_add, &addArgs[0], 2), node(nf_globalIndex)};
+  node root = node(nf_mul, mulArgs);cout << "root : " << &root << endl;
   
   
   // this also works
@@ -38,7 +38,7 @@ int main(int argc, char const **argv) {
   
   
   vector<num> data;
-  data.resize(600, 0);
+  data.resize(1000, 0);
   outputTo(root, data);
   
   const uint pitch = 10;

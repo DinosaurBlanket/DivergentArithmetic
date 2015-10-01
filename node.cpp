@@ -10,10 +10,17 @@ const uint chunkSize = 256;
 
 void outputTo(node &root, num *destData, uint destDataSize) {
   node dummyNode = node(nf_dummy, &root, 1);cout << "dummy: " << &dummyNode << endl;
-  for (uint i = 0; i < destDataSize; i += chunkSize) {
+  num *dummyNodesData = dummyNode.inputData;
+  uint i = 0;
+  for (; i+chunkSize < destDataSize; i += chunkSize) {
+    dummyNode.inputData = &destData[i];
     dummyNode.output(nullptr, 0, i);
-    uint copyCount = i+chunkSize > destDataSize ? destDataSize-i : chunkSize;
-    std::memcpy(&destData[i], dummyNode.inputData, copyCount*sizeof(num));
+  }
+  dummyNode.inputData = dummyNodesData;
+  uint remainder = destDataSize % chunkSize;
+  if (remainder) {
+    dummyNode.output(nullptr, 0, i);
+    std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
 void outputTo(node &root, std::vector<num> &destData) {
@@ -111,54 +118,3 @@ void nf_globalIndex(_nodeFuncParams) {
 
 void nf_dummy(_nodeFuncParams) {}
 
-
-
-/*
-dvrgArithNode::dvrgArithNode() {}
-dvrgArithNode::dvrgArithNode(nodeFunc nfIn, vector<dvrgArithNode> &argsIn)
-: nf(nfIn), args(argsIn) {
-  inputData.resize(args.size()*packetSize);
-}
-dvrgArithNode::dvrgArithNode(nodeFunc nfIn) : nf(nfIn) {
-  inputData.resize(packetSize);
-}
-dvrgArithNode::dvrgArithNode(num literal) {
-  inputData.resize(packetSize);
-  for (uint i = 0; i < packetSize; i ++) inputData[i] = literal;
-}
-void dvrgArithNode::output(_nodeFuncParams) {
-  for (uint arg = 0; arg < args.size(); arg++) {
-    args[arg].output(*this, arg, args[arg]);
-  }
-  nf(dest, destOffset, src);
-}
-
-
-#define INTERLEAVE_PACKET_DATA true
-
-void nf_literal(_nodeFuncParams) {
-  #if INTERLEAVE_PACKET_DATA
-  uint di = 0, si = 0;
-  for (;
-    di < dest.inputData.size();
-    di += dest.inputData.args.size(), si += 1
-  ) {
-    dest.inputData[di] = src.inputData[si]
-  }
-  #else
-  #endif
-}
-
-void nf_add(_nodeFuncParams) {
-  #if INTERLEAVE_PACKET_DATA
-  uint di = 0, si = 0;
-  for (;
-    di < dest.inputData.size();
-    di += dest.inputData.args.size(), si += src.inputData.args.size()
-  ) {
-    dest.inputData[di] = src.inputData[si] + src.inputData[si+1];
-  }
-  #else
-  #endif
-}
-*/
