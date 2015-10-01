@@ -1,18 +1,24 @@
 
 
+#include "node.hpp"
+#include <cstring>
+
+#if LOG_NODE_CONSTR_DESTR
 #include <iostream>
 using std::cout;
 using std::endl;
-#include "node.hpp"
-#include <cstring>
+#endif
 
 const uint chunkSize = 256;
 
 void node::outputTo(num *destData, uint destDataSize) {
-  node dummyNode = node(nf_dummy, this, 1);cout << "dummy: " << &dummyNode << endl;
+  node dummyNode = node(nf_dummy, this, 1);
+  #if LOG_NODE_CONSTR_DESTR
+  cout << "dummy: " << &dummyNode << endl;
+  #endif
   num *dummyNodesData = dummyNode.inputData;
   uint i = 0;
-  for (; i+chunkSize < destDataSize; i += chunkSize) {
+  for (; i+chunkSize <= destDataSize; i += chunkSize) {
     dummyNode.inputData = &destData[i];
     dummyNode.output(nullptr, 0, i);
   }
@@ -72,12 +78,17 @@ node::node(const node &n) :
   argCount(n.argCount),
   nf(n.nf)
 {
+  #if LOG_NODE_CONSTR_DESTR
   cout << "copying from " << &n << " to " << this << endl;
+  #endif
   if (inputDataCount) inputData = new num[inputDataCount];
+  else inputData = nullptr;
 }
 
 node::~node() {
+  #if LOG_NODE_CONSTR_DESTR
   cout << "deleting inputData from: " << this << endl;
+  #endif
   if (inputData) delete[] inputData;
 }
 
@@ -96,16 +107,29 @@ void nf_literal(_nodeFuncParams) {
   }
 }
 
+
 void nf_add(_nodeFuncParams) {
   uint di = destOffset, si = 0;
   for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
     dest->inputData[di] = src->inputData[si] + src->inputData[si+1];
   }
 }
+void nf_sub(_nodeFuncParams) {
+  uint di = destOffset, si = 0;
+  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
+    dest->inputData[di] = src->inputData[si] - src->inputData[si+1];
+  }
+}
 void nf_mul(_nodeFuncParams) {
   uint di = destOffset, si = 0;
   for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
     dest->inputData[di] = src->inputData[si] * src->inputData[si+1];
+  }
+}
+void nf_div(_nodeFuncParams) {
+  uint di = destOffset, si = 0;
+  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
+    dest->inputData[di] = src->inputData[si] / src->inputData[si+1];
   }
 }
 

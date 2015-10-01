@@ -4,7 +4,7 @@
 using std::cout;
 using std::endl;
 #include <chrono>
-#include "dvrgArithNode.hpp"
+#include "node.hpp"
 
 
 typedef num (*op)(num, num);
@@ -26,19 +26,26 @@ num everyFn(switch_op op, num a, num b) {
 }
 
 
+#define _checkData \
+for (uint i = 0; i < dataSize; i++) {\
+  if (data[i] != 100) {\
+    cout << "incorrect data at " << i << ": " << data[i] << endl;\
+    exit(1);\
+  }\
+  data[i] = 0;\
+}
 
 
-
-int main(int argc, char const *argv) {
+int main(int argc, char const **argv) {
   long dataSize = 1e6;
   num data[dataSize];
   cout << "dataSize: " << dataSize << endl;
-  for (int i = 0; i < dataSize; i++) {data[i] = 0;}
+  for (uint i = 0; i < dataSize; i++) {data[i] = 0;}
   
   //control
   {
   	auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < dataSize; i++) {
+    for (uint i = 0; i < dataSize; i++) {
       data[i] = _add(90, _sub(12, _div(8, _mul(2, 2))));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
@@ -47,15 +54,7 @@ int main(int argc, char const *argv) {
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
-  
-  
-  for (int i = 0; i < dataSize; i++) {
-    if (data[i] != 100) {
-      cout << "incorrect data at " << i << ": " << data[i] << endl;;
-      exit(1);
-    }
-    data[i] = 0;
-  }
+  _checkData
   
   //every fn ptr per iteration
   {
@@ -65,7 +64,7 @@ int main(int argc, char const *argv) {
     const op opMul = argc > 1000 ? _div : _mul;
     const op opDiv = argc > 1000 ? _add : _div;
   	auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < dataSize; i++) {
+    for (uint i = 0; i < dataSize; i++) {
       data[i] = opAdd(90, opSub(12, opDiv(8, opMul(2, 2))));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
@@ -74,15 +73,7 @@ int main(int argc, char const *argv) {
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
-  
-  
-  for (int i = 0; i < dataSize; i++) {
-    if (data[i] != 100) {
-      cout << "incorrect data at " << i << ": " << data[i] << endl;;
-      exit(1);
-    }
-    data[i] = 0;
-  }
+  _checkData
   
   //switch per iteration
   {
@@ -91,7 +82,7 @@ int main(int argc, char const *argv) {
     const switch_op m = argc > 1000 ? so_div : so_mul;
     const switch_op d = argc > 1000 ? so_add : so_div;
   	auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < dataSize; i++) {
+    for (uint i = 0; i < dataSize; i++) {
       data[i] = everyFn(a, 90, everyFn(s, 12, everyFn(d, 8, everyFn(m, 2, 2))));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
@@ -100,16 +91,7 @@ int main(int argc, char const *argv) {
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
-  
-  
-  for (int i = 0; i < dataSize; i++) {
-    if (data[i] != 100) {
-      cout << "incorrect data at " << i << ": " << data[i] << endl;
-      exit(1);
-    }
-    data[i] = 0;
-  }
-  
+  _checkData
   
   //one fn ptr per iteration
   {
@@ -118,24 +100,39 @@ int main(int argc, char const *argv) {
     const op opMul = argc > 1000 ? _div : _mul;
     const op opDiv = argc > 1000 ? _add : _div;
   	auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < dataSize; i++) {data[i] = opMul(2, 2);}
-    for (int i = 0; i < dataSize; i++) {data[i] = opDiv(8, data[i]);}
-    for (int i = 0; i < dataSize; i++) {data[i] = opSub(12, data[i]);}
-    for (int i = 0; i < dataSize; i++) {data[i] = opAdd(90, data[i]);}
+    for (uint i = 0; i < dataSize; i++) {data[i] = opMul(2, 2);}
+    for (uint i = 0; i < dataSize; i++) {data[i] = opDiv(8, data[i]);}
+    for (uint i = 0; i < dataSize; i++) {data[i] = opSub(12, data[i]);}
+    for (uint i = 0; i < dataSize; i++) {data[i] = opAdd(90, data[i]);}
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "one fn ptr per iteration: " <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
+  _checkData
   
-  
-  for (int i = 0; i < dataSize; i++) {
-    if (data[i] != 100) {
-      cout << "incorrect data at " << i << ": " << data[i] << endl;;
-      exit(1);
-    }
+  //node
+  {
+    //data[i] = _add(90, _sub(12, _div(8, _mul(2, 2))));
+    std::vector<node> mulArgs = {node( 2), node(2)};
+    node muln = node(nf_mul, mulArgs);
+    std::vector<node> divArgs = {node( 8), muln};
+    node divn = node(nf_div, divArgs);
+    std::vector<node> subArgs = {node(12), divn};
+    node subn = node(nf_sub, subArgs);
+    std::vector<node> addArgs = {node(90), subn};
+    node addn = node(nf_add, addArgs);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    addn.outputTo(data, dataSize);
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    cout << "nodes: " <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds" << endl;
   }
+  _checkData
+  
   return 0;
 }
 

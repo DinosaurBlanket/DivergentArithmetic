@@ -1,7 +1,9 @@
-
+#pragma once
 #include <vector>
 #include "num.h"
 typedef unsigned int uint;
+
+#define LOG_NODE_CONSTR_DESTR false
 
 struct node;
 
@@ -29,7 +31,9 @@ struct node {
 
 
 void nf_add(_nodeFuncParams);
+void nf_sub(_nodeFuncParams);
 void nf_mul(_nodeFuncParams);
+void nf_div(_nodeFuncParams);
 void nf_literal(_nodeFuncParams);
 void nf_globalIndex(_nodeFuncParams);
 void nf_dummy(_nodeFuncParams);
