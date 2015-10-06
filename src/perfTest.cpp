@@ -8,7 +8,6 @@ using std::endl;
 #include "node_s.hpp"
 
 
-typedef num (*op)(num, num);
 
 num _add(num a, num b) {return a + b;}
 num _sub(num a, num b) {return a - b;}
