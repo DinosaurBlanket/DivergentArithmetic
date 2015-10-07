@@ -28,11 +28,11 @@ num everyFn(switch_op op, num a, num b) {
 
 #define _checkData \
 for (uint i = 0; i < dataSize; i++) {\
-  if (data[i] != 100) {\
+  if (data[i] != i) {\
     cout << "incorrect data at " << i << ": " << data[i] << endl;\
     exit(1);\
   }\
-  data[i] = 0;\
+  data[i] = -1;\
 }
 
 
@@ -46,7 +46,7 @@ int main(int argc, char const **argv) {
   {
   	auto start_time = std::chrono::high_resolution_clock::now();
     for (uint i = 0; i < dataSize; i++) {
-      data[i] = _add(90, _sub(12, _div(8, _mul(2, 2))));
+      data[i] = _add(i, _sub(_mul(2, _div(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "control: " <<
@@ -54,7 +54,6 @@ int main(int argc, char const **argv) {
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
-  _checkData
   
   //every fn ptr per iteration
   {
@@ -65,7 +64,7 @@ int main(int argc, char const **argv) {
     const op opDiv = argc > 1000 ? _add : _div;
   	auto start_time = std::chrono::high_resolution_clock::now();
     for (uint i = 0; i < dataSize; i++) {
-      data[i] = opAdd(90, opSub(12, opDiv(8, opMul(2, 2))));
+      data[i] = opAdd(i, opSub(opMul(2, opDiv(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "every fn ptr per iteration: " <<
@@ -83,7 +82,7 @@ int main(int argc, char const **argv) {
     const switch_op d = argc > 1000 ? so_add : so_div;
   	auto start_time = std::chrono::high_resolution_clock::now();
     for (uint i = 0; i < dataSize; i++) {
-      data[i] = everyFn(a, 90, everyFn(s, 12, everyFn(d, 8, everyFn(m, 2, 2))));
+      data[i] = everyFn(a, i, everyFn(s, everyFn(m, 2, everyFn(d, i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "switch per iteration: " <<
@@ -93,34 +92,16 @@ int main(int argc, char const **argv) {
   }
   _checkData
   
-  //one fn ptr per iteration
-  {
-    const op opAdd = argc > 1000 ? _sub : _add;
-    const op opSub = argc > 1000 ? _mul : _sub;
-    const op opMul = argc > 1000 ? _div : _mul;
-    const op opDiv = argc > 1000 ? _add : _div;
-  	auto start_time = std::chrono::high_resolution_clock::now();
-    for (uint i = 0; i < dataSize; i++) {data[i] = opMul(2, 2);}
-    for (uint i = 0; i < dataSize; i++) {data[i] = opDiv(8, data[i]);}
-    for (uint i = 0; i < dataSize; i++) {data[i] = opSub(12, data[i]);}
-    for (uint i = 0; i < dataSize; i++) {data[i] = opAdd(90, data[i]);}
-  	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "one fn ptr per iteration: " <<
-    std::chrono::duration_cast<std::chrono::microseconds>(
-      end_time - start_time
-    ).count() << " microseconds" << endl;
-  }
-  _checkData
   
   //node_f
   {
-    std::vector<node> mulArgs = {node( 2), node(2)};
-    node muln = node(nf_mul, mulArgs);
-    std::vector<node> divArgs = {node( 8), muln};
+    std::vector<node> divArgs = {node(nf_globalIndex), node( 2)};
     node divn = node(nf_div, divArgs);
-    std::vector<node> subArgs = {node(12), divn};
+    std::vector<node> mulArgs = {node( 2), divn};
+    node muln = node(nf_mul, mulArgs);
+    std::vector<node> subArgs = {muln, node(nf_globalIndex)};
     node subn = node(nf_sub, subArgs);
-    std::vector<node> addArgs = {node(90), subn};
+    std::vector<node> addArgs = {node(nf_globalIndex), subn};
     node addn = node(nf_add, addArgs);
     auto start_time = std::chrono::high_resolution_clock::now();
     addn.outputTo(data, dataSize);
@@ -134,13 +115,13 @@ int main(int argc, char const **argv) {
   
   //node_s
   {
-    std::vector<node_s> mulArgs = {node_s( 2), node_s(2)};
-    node_s muln = node_s(ni_mul, mulArgs);
-    std::vector<node_s> divArgs = {node_s( 8), muln};
+    std::vector<node_s> divArgs = {node_s(ni_globalIndex), node_s( 2)};
     node_s divn = node_s(ni_div, divArgs);
-    std::vector<node_s> subArgs = {node_s(12), divn};
+    std::vector<node_s> mulArgs = {node_s( 2), divn};
+    node_s muln = node_s(ni_mul, mulArgs);
+    std::vector<node_s> subArgs = {muln, node_s(ni_globalIndex)};
     node_s subn = node_s(ni_sub, subArgs);
-    std::vector<node_s> addArgs = {node_s(90), subn};
+    std::vector<node_s> addArgs = {node_s(ni_globalIndex), subn};
     node_s addn = node_s(ni_add, addArgs);
     auto start_time = std::chrono::high_resolution_clock::now();
     addn.outputTo(data, dataSize);
