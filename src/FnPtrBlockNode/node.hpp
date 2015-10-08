@@ -1,29 +1,29 @@
 #pragma once
 #include <vector>
-#include "num.h"
+#include "../num.h"
 
 #define LOG_NODE_CONSTR_DESTR false
 
-struct node;
+struct node_fb;
 
 #define _nodeFuncParams \
-  node *dest, uint destOffset, node *src, uint globalIndexOffset
+  node_fb *dest, uint destOffset, node_fb *src, uint globalIndexOffset
 typedef void (*nodeFunc)(_nodeFuncParams);
 
-struct node {
+struct node_fb {
   num      singleData;
   num     *inputData;
   uint     inputDataCount;
-  node    *args;
+  node_fb *args;
   uint     argCount;
   nodeFunc nf;
-  node(num literal);
-  node(nodeFunc nfIn);
-  node(nodeFunc nfIn, node *argsIn, uint argCountIn);
-  node(nodeFunc nfIn, std::vector<node> &argsIn);
-  node(const node &n);
-  ~node();
-  void output(node *dest, uint destOffset, uint globalIndexOffset);
+  node_fb(num literal);
+  node_fb(nodeFunc nfIn);
+  node_fb(nodeFunc nfIn, node_fb *argsIn, uint argCountIn);
+  node_fb(nodeFunc nfIn, std::vector<node_fb> &argsIn);
+  node_fb(const node_fb &n);
+  ~node_fb();
+  void output(node_fb *dest, uint destOffset, uint globalIndexOffset);
   void outputTo(num *destData, uint destDataSize);
   void outputTo(std::vector<num> &destData);
 };

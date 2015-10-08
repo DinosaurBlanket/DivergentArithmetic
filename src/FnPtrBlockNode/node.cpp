@@ -1,6 +1,6 @@
 
 
-#include "node_f.hpp"
+#include "node.hpp"
 #include <cstring>
 
 #if LOG_NODE_CONSTR_DESTR
@@ -11,8 +11,8 @@ using std::endl;
 
 const uint chunkSize = 256;
 
-void node::outputTo(num *destData, uint destDataSize) {
-  node dummyNode = node(nf_dummy, this, 1);
+void node_fb::outputTo(num *destData, uint destDataSize) {
+  node_fb dummyNode = node_fb(nf_dummy, this, 1);
   #if LOG_NODE_CONSTR_DESTR
   cout << "dummy: " << &dummyNode << endl;
   #endif
@@ -29,11 +29,11 @@ void node::outputTo(num *destData, uint destDataSize) {
     std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
-void node::outputTo(std::vector<num> &destData) {
+void node_fb::outputTo(std::vector<num> &destData) {
   outputTo(destData.data(), destData.size());
 }
 
-node::node(num literal) :
+node_fb::node_fb(num literal) :
   singleData(literal),
   inputData(nullptr),
   inputDataCount(0),
@@ -42,7 +42,7 @@ node::node(num literal) :
   nf(nf_literal)
 {}
 
-node::node(nodeFunc nfIn) :
+node_fb::node_fb(nodeFunc nfIn) :
   singleData(0),
   inputData(nullptr),
   inputDataCount(0),
@@ -51,7 +51,7 @@ node::node(nodeFunc nfIn) :
   nf(nfIn)
 {}
 
-node::node(nodeFunc nfIn, node *argsIn, uint argCountIn) :
+node_fb::node_fb(nodeFunc nfIn, node_fb *argsIn, uint argCountIn) :
   singleData(0),
   inputDataCount(argCountIn*chunkSize),
   args(argsIn),
@@ -61,7 +61,7 @@ node::node(nodeFunc nfIn, node *argsIn, uint argCountIn) :
   inputData = new num[inputDataCount];
 }
 
-node::node(nodeFunc nfIn, std::vector<node> &argsIn) :
+node_fb::node_fb(nodeFunc nfIn, std::vector<node_fb> &argsIn) :
   singleData(0),
   inputDataCount(argsIn.size()*chunkSize),
   args(argsIn.data()),
@@ -71,7 +71,7 @@ node::node(nodeFunc nfIn, std::vector<node> &argsIn) :
   inputData = new num[inputDataCount];
 }
 
-node::node(const node &n) :
+node_fb::node_fb(const node_fb &n) :
   singleData(n.singleData),
   inputDataCount(n.inputDataCount),
   args(n.args),
@@ -85,14 +85,14 @@ node::node(const node &n) :
   else inputData = nullptr;
 }
 
-node::~node() {
+node_fb::~node_fb() {
   #if LOG_NODE_CONSTR_DESTR
   cout << "deleting inputData from: " << this << endl;
   #endif
   if (inputData) delete[] inputData;
 }
 
-void node::output(node *dest, uint destOffset, uint globalIndexOffset) {
+void node_fb::output(node_fb *dest, uint destOffset, uint globalIndexOffset) {
   for (uint i = 0; i < argCount; i++) {
     args[i].output(this, i, globalIndexOffset);
   }

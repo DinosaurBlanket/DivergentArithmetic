@@ -1,6 +1,6 @@
 
 
-#include "node_s.hpp"
+#include "node.hpp"
 #include <cstring>
 #include <iostream>
 using std::cout;
@@ -9,8 +9,8 @@ using std::endl;
 
 const uint chunkSize = 256;
 
-void node_s::outputTo(num *destData, uint destDataSize) {
-  node_s dummyNode = node_s(ni_dummy, this, 1);
+void node_sb::outputTo(num *destData, uint destDataSize) {
+  node_sb dummyNode = node_sb(ni_dummy, this, 1);
   #if LOG_NODE_CONSTR_DESTR
   cout << "dummy: " << &dummyNode << endl;
   #endif
@@ -27,11 +27,11 @@ void node_s::outputTo(num *destData, uint destDataSize) {
     std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
-void node_s::outputTo(std::vector<num> &destData) {
+void node_sb::outputTo(std::vector<num> &destData) {
   outputTo(destData.data(), destData.size());
 }
 
-node_s::node_s(num literal) :
+node_sb::node_sb(num literal) :
   singleData(literal),
   inputData(nullptr),
   inputDataCount(0),
@@ -40,7 +40,7 @@ node_s::node_s(num literal) :
   ni(ni_literal)
 {}
 
-node_s::node_s(nodeIden niIn) :
+node_sb::node_sb(nodeIden niIn) :
   singleData(0),
   inputData(nullptr),
   inputDataCount(0),
@@ -49,7 +49,7 @@ node_s::node_s(nodeIden niIn) :
   ni(niIn)
 {}
 
-node_s::node_s(nodeIden niIn, node_s *argsIn, uint argCountIn) :
+node_sb::node_sb(nodeIden niIn, node_sb *argsIn, uint argCountIn) :
   singleData(0),
   inputDataCount(argCountIn*chunkSize),
   args(argsIn),
@@ -59,7 +59,7 @@ node_s::node_s(nodeIden niIn, node_s *argsIn, uint argCountIn) :
   inputData = new num[inputDataCount];
 }
 
-node_s::node_s(nodeIden niIn, std::vector<node_s> &argsIn) :
+node_sb::node_sb(nodeIden niIn, std::vector<node_sb> &argsIn) :
   singleData(0),
   inputDataCount(argsIn.size()*chunkSize),
   args(argsIn.data()),
@@ -69,7 +69,7 @@ node_s::node_s(nodeIden niIn, std::vector<node_s> &argsIn) :
   inputData = new num[inputDataCount];
 }
 
-node_s::node_s(const node_s &n) :
+node_sb::node_sb(const node_sb &n) :
   singleData(n.singleData),
   inputDataCount(n.inputDataCount),
   args(n.args),
@@ -80,11 +80,11 @@ node_s::node_s(const node_s &n) :
   else inputData = nullptr;
 }
 
-node_s::~node_s() {
+node_sb::~node_sb() {
   if (inputData) delete[] inputData;
 }
 
-void node_s::output(node_s *dest, uint destOffset, uint globalIndexOffset) {
+void node_sb::output(node_sb *dest, uint destOffset, uint globalIndexOffset) {
   for (uint i = 0; i < argCount; i++) {
     args[i].output(this, i, globalIndexOffset);
   }

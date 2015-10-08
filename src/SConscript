@@ -1,11 +1,8 @@
 env = Environment(CC = "g++", CCFLAGS = "-Wall -std=c++11 -O3")
-
-src = ["node_fTest.cpp", env.Object("node_f.cpp")]
-env.Program("node_fTest", src,  LIBS = [])
-
-src = ["node_sTest.cpp", env.Object("node_s.cpp")]
-env.Program("node_sTest", src,  LIBS = [])
-
-src = ["perfTest.cpp", env.Object("node_f.cpp"), env.Object("node_s.cpp")]
+src = [
+    "perfTest.cpp",
+    "FnPtrBlockNode/node.cpp",
+    "SwitchBlockNode/node.cpp",
+]
 env.Program("perfTest", src,  LIBS = [])
 

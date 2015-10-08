@@ -3,9 +3,12 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <iomanip>
+using std::setfill;
+using std::setw;
 #include <chrono>
-#include "node_f.hpp"
-#include "node_s.hpp"
+#include "FnPtrBlockNode/node.hpp"
+#include "SwitchBlockNode/node.hpp"
 
 
 
@@ -35,6 +38,7 @@ for (uint i = 0; i < dataSize; i++) {\
   data[i] = -1;\
 }
 
+#define intPrintWidth 8
 
 int main(int argc, char const **argv) {
   long dataSize = 1e6;
@@ -49,7 +53,7 @@ int main(int argc, char const **argv) {
       data[i] = _add(i, _sub(_mul(2, _div(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "control: " <<
+    cout << "control        : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -67,7 +71,7 @@ int main(int argc, char const **argv) {
       data[i] = opAdd(i, opSub(opMul(2, opDiv(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "every fn ptr per iteration: " <<
+    cout << "fn ptr direct  : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -85,7 +89,7 @@ int main(int argc, char const **argv) {
       data[i] = everyFn(a, i, everyFn(s, everyFn(m, 2, everyFn(d, i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "switch per iteration: " <<
+    cout << "switch direct  : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -93,40 +97,40 @@ int main(int argc, char const **argv) {
   _checkData
   
   
-  //node_f
+  //FnPtrBlockNode
   {
-    std::vector<node> divArgs = {node(nf_globalIndex), node( 2)};
-    node divn = node(nf_div, divArgs);
-    std::vector<node> mulArgs = {node( 2), divn};
-    node muln = node(nf_mul, mulArgs);
-    std::vector<node> subArgs = {muln, node(nf_globalIndex)};
-    node subn = node(nf_sub, subArgs);
-    std::vector<node> addArgs = {node(nf_globalIndex), subn};
-    node addn = node(nf_add, addArgs);
+    std::vector<node_fb> divArgs_fb = {node_fb(nf_globalIndex), node_fb( 2)};
+    node_fb divn_fb = node_fb(nf_div, divArgs_fb);
+    std::vector<node_fb> mulArgs_fb = {node_fb( 2), divn_fb};
+    node_fb muln_fb = node_fb(nf_mul, mulArgs_fb);
+    std::vector<node_fb> subArgs_fb = {muln_fb, node_fb(nf_globalIndex)};
+    node_fb subn_fb = node_fb(nf_sub, subArgs_fb);
+    std::vector<node_fb> addArgs_fb = {node_fb(nf_globalIndex), subn_fb};
+    node_fb addn_fb = node_fb(nf_add, addArgs_fb);
     auto start_time = std::chrono::high_resolution_clock::now();
-    addn.outputTo(data, dataSize);
+    addn_fb.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "node_f: " <<
+    cout << "FnPtrBlockNode : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
   _checkData
   
-  //node_s
+  //SwitchBlockNode
   {
-    std::vector<node_s> divArgs = {node_s(ni_globalIndex), node_s( 2)};
-    node_s divn = node_s(ni_div, divArgs);
-    std::vector<node_s> mulArgs = {node_s( 2), divn};
-    node_s muln = node_s(ni_mul, mulArgs);
-    std::vector<node_s> subArgs = {muln, node_s(ni_globalIndex)};
-    node_s subn = node_s(ni_sub, subArgs);
-    std::vector<node_s> addArgs = {node_s(ni_globalIndex), subn};
-    node_s addn = node_s(ni_add, addArgs);
+    std::vector<node_sb> divArgs = {node_sb(ni_globalIndex), node_sb( 2)};
+    node_sb divn = node_sb(ni_div, divArgs);
+    std::vector<node_sb> mulArgs = {node_sb( 2), divn};
+    node_sb muln = node_sb(ni_mul, mulArgs);
+    std::vector<node_sb> subArgs = {muln, node_sb(ni_globalIndex)};
+    node_sb subn = node_sb(ni_sub, subArgs);
+    std::vector<node_sb> addArgs = {node_sb(ni_globalIndex), subn};
+    node_sb addn = node_sb(ni_add, addArgs);
     auto start_time = std::chrono::high_resolution_clock::now();
     addn.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "node_s: " <<
+    cout << "SwitchBlockNode: " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
