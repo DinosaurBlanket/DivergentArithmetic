@@ -1,6 +1,6 @@
 
-
 #include "node.hpp"
+#include "../options.h"
 #include <cstring>
 
 #if LOG_NODE_CONSTR_DESTR
@@ -9,7 +9,6 @@ using std::cout;
 using std::endl;
 #endif
 
-const uint chunkSize = 256;
 
 void node_fb::outputTo(num *destData, uint destDataSize) {
   node_fb dummyNode = node_fb(nf_dummy, this, 1);
@@ -20,12 +19,12 @@ void node_fb::outputTo(num *destData, uint destDataSize) {
   uint i = 0;
   for (; i+chunkSize <= destDataSize; i += chunkSize) {
     dummyNode.inputData = &destData[i];
-    this->output(&dummyNode, 0, i);
+    output(&dummyNode, 0, i);
   }
   dummyNode.inputData = dummyNodesData;
   uint remainder = destDataSize % chunkSize;
   if (remainder) {
-    this->output(&dummyNode, 0, i);
+    output(&dummyNode, 0, i);
     std::memcpy(&destData[i], dummyNode.inputData, remainder*sizeof(num));
   }
 }
@@ -102,43 +101,70 @@ void node_fb::output(node_fb *dest, uint destOffset, uint globalIndexOffset) {
 
 
 void nf_literal(_nodeFuncParams) {
-  for (uint di = destOffset; di < dest->inputDataCount; di += dest->argCount) {
-    dest->inputData[di] = src->singleData;
-  }
-}
-
-
-void nf_add(_nodeFuncParams) {
-  uint di = destOffset, si = 0;
-  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
-    dest->inputData[di] = src->inputData[si] + src->inputData[si+1];
-  }
-}
-void nf_sub(_nodeFuncParams) {
-  uint di = destOffset, si = 0;
-  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
-    dest->inputData[di] = src->inputData[si] - src->inputData[si+1];
-  }
-}
-void nf_mul(_nodeFuncParams) {
-  uint di = destOffset, si = 0;
-  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
-    dest->inputData[di] = src->inputData[si] * src->inputData[si+1];
-  }
-}
-void nf_div(_nodeFuncParams) {
-  uint di = destOffset, si = 0;
-  for (; di < dest->inputDataCount; di += dest->argCount, si += src->argCount) {
-    dest->inputData[di] = src->inputData[si] / src->inputData[si+1];
-  }
+  const num out = src->singleData;
+  #if INTERLACE_INPUT_DATA
+    for (
+      uint di = destOffset;
+      di < dest->inputDataCount;
+      di += dest->argCount
+    ) {
+      dest->inputData[di] = out;
+    }
+  #else
+    uint di = destOffset * chunkSize;
+    const uint diEnd = di + chunkSize;
+    for (; di < diEnd; di++) dest->inputData[di] = out;
+  #endif
 }
 
 void nf_globalIndex(_nodeFuncParams) {
-  uint di = destOffset, gi = globalIndexOffset;
-  for (; di < dest->inputDataCount; di += dest->argCount, gi++) {
-    dest->inputData[di] = gi;
-  }
+  #if INTERLACE_INPUT_DATA
+    uint di = destOffset, gi = globalIndexOffset;
+    for (; di < dest->inputDataCount; di += dest->argCount, gi++) {
+      dest->inputData[di] = gi;
+    }
+  #else
+    uint di = destOffset * chunkSize;
+    const uint diEnd = di + chunkSize;
+    uint gi = globalIndexOffset;
+    for (; di < diEnd; di++, gi++) dest->inputData[di] = gi;
+  #endif
 }
+
+
+#if INTERLACE_INPUT_DATA
+
+#define _binaryOp(_name, _op) \
+void _name(_nodeFuncParams) {\
+  uint di = destOffset, si = 0;\
+  for (;\
+    di < dest->inputDataCount;\
+    di += dest->argCount, si += src->argCount\
+  ) {\
+    dest->inputData[di] = src->inputData[si] _op src->inputData[si+1];\
+  }\
+}
+
+#else
+
+#define _binaryOp(_name, _op) \
+void _name(_nodeFuncParams) {\
+  uint di = destOffset * chunkSize;\
+  const uint diEnd = di + chunkSize;\
+  uint siA = 0;\
+  uint siB = chunkSize;\
+  for (; di < diEnd; di++, siA++, siB++) {\
+    dest->inputData[di] = src->inputData[siA] _op src->inputData[siB];\
+  }\
+}
+
+#endif
+
+_binaryOp(nf_add, +)
+_binaryOp(nf_sub, -)
+_binaryOp(nf_mul, *)
+_binaryOp(nf_div, /)
+
 
 void nf_dummy(_nodeFuncParams) {}
 

@@ -1,13 +1,14 @@
 
 
 #include "node.hpp"
+#include "../options.h"
 #include <cstring>
+
 #include <iostream>
 using std::cout;
 using std::endl;
 
 
-const uint chunkSize = 256;
 
 void node_sb::outputTo(num *destData, uint destDataSize) {
   node_sb dummyNode = node_sb(ni_dummy, this, 1);
@@ -88,51 +89,116 @@ void node_sb::output(node_sb *dest, uint destOffset, uint globalIndexOffset) {
   for (uint i = 0; i < argCount; i++) {
     args[i].output(this, i, globalIndexOffset);
   }
-  //nf(dest, destOffset, this, globalIndexOffset);
   switch (ni) {
     case ni_literal: {
-      for (
-        uint di = destOffset;
-        di < dest->inputDataCount;
-        di += dest->argCount
-      ) {
-        dest->inputData[di] = singleData;
-      }
+      const num out = singleData;
+      #if INTERLACE_INPUT_DATA
+        for (
+          uint di = destOffset;
+          di < dest->inputDataCount;
+          di += dest->argCount
+        ) {
+          dest->inputData[di] = out;
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        for (; di < diEnd; di++) dest->inputData[di] = out;
+      #endif
       break;
     }
     case ni_add: {
-      uint di = destOffset, si = 0;
-      for (; di < dest->inputDataCount; di += dest->argCount, si += argCount) {
-        dest->inputData[di] = inputData[si] + inputData[si+1];
-      }
+      #if INTERLACE_INPUT_DATA
+        uint di = destOffset, si = 0;
+        for (;
+          di < dest->inputDataCount;
+          di += dest->argCount, si += argCount
+        ) {
+          dest->inputData[di] = inputData[si] + inputData[si+1];
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        uint siA = 0;
+        uint siB = chunkSize;
+        for (; di < diEnd; di++, siA++, siB++) {
+          dest->inputData[di] = inputData[siA] + inputData[siB];
+        }
+      #endif
       break;
     }
     case ni_sub: {
-      uint di = destOffset, si = 0;
-      for (; di < dest->inputDataCount; di += dest->argCount, si += argCount) {
-        dest->inputData[di] = inputData[si] - inputData[si+1];
-      }
+      #if INTERLACE_INPUT_DATA
+        uint di = destOffset, si = 0;
+        for (;
+          di < dest->inputDataCount;
+          di += dest->argCount, si += argCount
+        ) {
+          dest->inputData[di] = inputData[si] - inputData[si+1];
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        uint siA = 0;
+        uint siB = chunkSize;
+        for (; di < diEnd; di++, siA++, siB++) {
+          dest->inputData[di] = inputData[siA] - inputData[siB];
+        }
+      #endif
       break;
     }
     case ni_mul: {
-      uint di = destOffset, si = 0;
-      for (; di < dest->inputDataCount; di += dest->argCount, si += argCount) {
-        dest->inputData[di] = inputData[si] * inputData[si+1];
-      }
+      #if INTERLACE_INPUT_DATA
+        uint di = destOffset, si = 0;
+        for (;
+          di < dest->inputDataCount;
+          di += dest->argCount, si += argCount
+        ) {
+          dest->inputData[di] = inputData[si] * inputData[si+1];
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        uint siA = 0;
+        uint siB = chunkSize;
+        for (; di < diEnd; di++, siA++, siB++) {
+          dest->inputData[di] = inputData[siA] * inputData[siB];
+        }
+      #endif
       break;
     }
     case ni_div: {
-      uint di = destOffset, si = 0;
-      for (; di < dest->inputDataCount; di += dest->argCount, si += argCount) {
-        dest->inputData[di] = inputData[si] / inputData[si+1];
-      }
+      #if INTERLACE_INPUT_DATA
+        uint di = destOffset, si = 0;
+        for (;
+          di < dest->inputDataCount;
+          di += dest->argCount, si += argCount
+        ) {
+          dest->inputData[di] = inputData[si] / inputData[si+1];
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        uint siA = 0;
+        uint siB = chunkSize;
+        for (; di < diEnd; di++, siA++, siB++) {
+          dest->inputData[di] = inputData[siA] / inputData[siB];
+        }
+      #endif
       break;
     }
     case ni_globalIndex: {
-      uint di = destOffset, gi = globalIndexOffset;
-      for (; di < dest->inputDataCount; di += dest->argCount, gi++) {
-        dest->inputData[di] = gi;
-      }
+      #if INTERLACE_INPUT_DATA
+        uint di = destOffset, gi = globalIndexOffset;
+        for (; di < dest->inputDataCount; di += dest->argCount, gi++) {
+          dest->inputData[di] = gi;
+        }
+      #else
+        uint di = destOffset * chunkSize;
+        const uint diEnd = di + chunkSize;
+        uint gi = globalIndexOffset;
+        for (; di < diEnd; di++, gi++) dest->inputData[di] = gi;
+      #endif
       break;
     }
     case ni_dummy: break;

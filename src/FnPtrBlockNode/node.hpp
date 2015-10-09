@@ -2,8 +2,6 @@
 #include <vector>
 #include "../num.h"
 
-#define LOG_NODE_CONSTR_DESTR false
-
 struct node_fb;
 
 #define _nodeFuncParams \

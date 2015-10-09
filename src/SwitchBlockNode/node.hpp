@@ -15,11 +15,11 @@ enum nodeIden {
 
 
 class node_sb {
-  num   singleData;
-  num  *inputData;
-  uint  inputDataCount;
+  num      singleData;
+  num     *inputData;
+  uint     inputDataCount;
   node_sb *args;
-  uint  argCount;
+  uint     argCount;
   nodeIden ni;
 public:
   node_sb(num literal);
