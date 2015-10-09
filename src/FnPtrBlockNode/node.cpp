@@ -41,7 +41,7 @@ node_fb::node_fb(num literal) :
   nf(nf_literal)
 {}
 
-node_fb::node_fb(nodeFunc nfIn) :
+node_fb::node_fb(nodeFunc_fb nfIn) :
   singleData(0),
   inputData(nullptr),
   inputDataCount(0),
@@ -50,7 +50,7 @@ node_fb::node_fb(nodeFunc nfIn) :
   nf(nfIn)
 {}
 
-node_fb::node_fb(nodeFunc nfIn, node_fb *argsIn, uint argCountIn) :
+node_fb::node_fb(nodeFunc_fb nfIn, node_fb *argsIn, uint argCountIn) :
   singleData(0),
   inputDataCount(argCountIn*chunkSize),
   args(argsIn),
@@ -60,7 +60,7 @@ node_fb::node_fb(nodeFunc nfIn, node_fb *argsIn, uint argCountIn) :
   inputData = new num[inputDataCount];
 }
 
-node_fb::node_fb(nodeFunc nfIn, std::vector<node_fb> &argsIn) :
+node_fb::node_fb(nodeFunc_fb nfIn, std::vector<node_fb> &argsIn) :
   singleData(0),
   inputDataCount(argsIn.size()*chunkSize),
   args(argsIn.data()),
@@ -100,7 +100,7 @@ void node_fb::output(node_fb *dest, uint destOffset, uint globalIndexOffset) {
 
 
 
-void nf_literal(_nodeFuncParams) {
+void nf_literal(_nodeFuncParams_fb) {
   const num out = src->singleData;
   #if INTERLACE_INPUT_DATA
     for (
@@ -117,7 +117,7 @@ void nf_literal(_nodeFuncParams) {
   #endif
 }
 
-void nf_globalIndex(_nodeFuncParams) {
+void nf_globalIndex(_nodeFuncParams_fb) {
   #if INTERLACE_INPUT_DATA
     uint di = destOffset, gi = globalIndexOffset;
     for (; di < dest->inputDataCount; di += dest->argCount, gi++) {
@@ -135,7 +135,7 @@ void nf_globalIndex(_nodeFuncParams) {
 #if INTERLACE_INPUT_DATA
 
 #define _binaryOp(_name, _op) \
-void _name(_nodeFuncParams) {\
+void _name(_nodeFuncParams_fb) {\
   uint di = destOffset, si = 0;\
   for (;\
     di < dest->inputDataCount;\
@@ -148,7 +148,7 @@ void _name(_nodeFuncParams) {\
 #else
 
 #define _binaryOp(_name, _op) \
-void _name(_nodeFuncParams) {\
+void _name(_nodeFuncParams_fb) {\
   uint di = destOffset * chunkSize;\
   const uint diEnd = di + chunkSize;\
   uint siA = 0;\
@@ -166,5 +166,5 @@ _binaryOp(nf_mul, *)
 _binaryOp(nf_div, /)
 
 
-void nf_dummy(_nodeFuncParams) {}
+void nf_dummy(_nodeFuncParams_fb) {}
 

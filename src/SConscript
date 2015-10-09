@@ -3,6 +3,7 @@ src = [
     "perfTest.cpp",
     "FnPtrBlockNode/node.cpp",
     "SwitchBlockNode/node.cpp",
+    "FnPtrSingleNode/node.cpp"
 ]
 env.Program("perfTest", src,  LIBS = [])
 

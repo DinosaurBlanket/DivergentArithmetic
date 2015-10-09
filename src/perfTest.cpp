@@ -9,6 +9,7 @@ using std::setw;
 #include <chrono>
 #include "FnPtrBlockNode/node.hpp"
 #include "SwitchBlockNode/node.hpp"
+#include "FnPtrSingleNode/node.hpp"
 
 
 
@@ -41,7 +42,7 @@ for (uint i = 0; i < dataSize; i++) {\
 #define intPrintWidth 8
 
 int main(int argc, char const **argv) {
-  long dataSize = 1e6;
+  long dataSize = 2048000;
   num data[dataSize];
   cout << "dataSize: " << dataSize << endl;
   for (uint i = 0; i < dataSize; i++) {data[i] = 0;}
@@ -53,7 +54,7 @@ int main(int argc, char const **argv) {
       data[i] = _add(i, _sub(_mul(2, _div(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "control        : " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "call direct    : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -131,6 +132,26 @@ int main(int argc, char const **argv) {
     addn.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "SwitchBlockNode: " << setfill(' ') << setw(intPrintWidth) <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds" << endl;
+  }
+  _checkData
+  
+  //FnPtrSingleNode
+  {
+    std::vector<node_fs> divArgs_fs = {node_fs(fs_globalIndex), node_fs( 2)};
+    node_fs divn_fs = node_fs(fs_div, divArgs_fs);
+    std::vector<node_fs> mulArgs_fs = {node_fs( 2), divn_fs};
+    node_fs muln_fs = node_fs(fs_mul, mulArgs_fs);
+    std::vector<node_fs> subArgs_fs = {muln_fs, node_fs(fs_globalIndex)};
+    node_fs subn_fs = node_fs(fs_sub, subArgs_fs);
+    std::vector<node_fs> addArgs_fs = {node_fs(fs_globalIndex), subn_fs};
+    node_fs addn_fs = node_fs(fs_add, addArgs_fs);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    addn_fs.outputTo(data, dataSize);
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    cout << "FnPtrSingleNode: " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
