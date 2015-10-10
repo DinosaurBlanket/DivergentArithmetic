@@ -10,6 +10,7 @@ using std::setw;
 #include "FnPtrBlockNode/node.hpp"
 #include "SwitchBlockNode/node.hpp"
 #include "FnPtrSingleNode/node.hpp"
+#include "lightning/lightning.h"
 
 
 
@@ -157,6 +158,31 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
+  
+  
+  //lightning
+  {
+    
+    auto start_time = std::chrono::high_resolution_clock::now();
+    initLightning();
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    auto compileTime = end_time - start_time;
+    
+    start_time = std::chrono::high_resolution_clock::now();
+    runLightning();
+  	end_time = std::chrono::high_resolution_clock::now();
+    
+    cout << "lightning test : " << setfill(' ') << setw(intPrintWidth) <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds, compiled in: " <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      compileTime
+    ).count() << " microseconds" << endl;
+    
+    cleanupLighntning();
+  }
+  //_checkData
   
   return 0;
 }
