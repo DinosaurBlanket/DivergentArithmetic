@@ -162,15 +162,16 @@ int main(int argc, char const **argv) {
   
   //lightning
   {
-    
     auto start_time = std::chrono::high_resolution_clock::now();
     initLightning();
   	auto end_time = std::chrono::high_resolution_clock::now();
     auto compileTime = end_time - start_time;
     
+    data[0] = 5;
     start_time = std::chrono::high_resolution_clock::now();
-    runLightning();
+    runLightning(data, dataSize);
   	end_time = std::chrono::high_resolution_clock::now();
+    cout << "lightning test output: " << data[0] << endl;
     
     cout << "lightning test : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
