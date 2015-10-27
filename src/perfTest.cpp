@@ -10,7 +10,7 @@ using std::setw;
 #include "FnPtrBlockNode/node.hpp"
 #include "SwitchBlockNode/node.hpp"
 #include "FnPtrSingleNode/node.hpp"
-#include "lightning/lightning.h"
+#include "SwitchSingleNode/node.hpp"
 
 
 
@@ -55,7 +55,7 @@ int main(int argc, char const **argv) {
       data[i] = _add(i, _sub(_mul(2, _div(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "call direct    : " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "call direct     : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -73,7 +73,7 @@ int main(int argc, char const **argv) {
       data[i] = opAdd(i, opSub(opMul(2, opDiv(i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "fn ptr direct  : " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "fn ptr direct   : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -91,7 +91,7 @@ int main(int argc, char const **argv) {
       data[i] = everyFn(a, i, everyFn(s, everyFn(m, 2, everyFn(d, i, 2)), i));
     }
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "switch direct  : " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "switch direct   : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -112,7 +112,7 @@ int main(int argc, char const **argv) {
     auto start_time = std::chrono::high_resolution_clock::now();
     addn_fb.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "FnPtrBlockNode : " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "FnPtrBlockNode  : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -132,7 +132,7 @@ int main(int argc, char const **argv) {
     auto start_time = std::chrono::high_resolution_clock::now();
     addn.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "SwitchBlockNode: " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "SwitchBlockNode : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -152,7 +152,52 @@ int main(int argc, char const **argv) {
     auto start_time = std::chrono::high_resolution_clock::now();
     addn_fs.outputTo(data, dataSize);
   	auto end_time = std::chrono::high_resolution_clock::now();
-    cout << "FnPtrSingleNode: " << setfill(' ') << setw(intPrintWidth) <<
+    cout << "FnPtrSingleNode : " << setfill(' ') << setw(intPrintWidth) <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds" << endl;
+  }
+  _checkData
+  
+  //SwitchSingleNode
+  {
+    /*
+    add         8
+      i         7
+      sub       6
+        mul     5
+          2     3
+          div   2
+            i   1
+            2   0
+        i       4
+    */
+    const uint nodeCount = 9;
+    ssn_node nodes[nodeCount];
+    nodes[0].ret  = 2;
+    nodes[0].iden = I_lit;
+    nodes[1].iden = I_index;
+    nodes[2].iden = I_div;
+    nodes[2].args[0] = 1;
+    nodes[2].args[1] = 0;
+    nodes[3].ret  = 2;
+    nodes[3].iden = I_lit;
+    nodes[4].iden = I_index;
+    nodes[5].iden = I_mul;
+    nodes[5].args[0] = 3;
+    nodes[5].args[1] = 2;
+    nodes[6].iden = I_sub;
+    nodes[6].args[0] = 5;
+    nodes[6].args[1] = 4;
+    nodes[7].iden = I_index;
+    nodes[8].iden = I_add;
+    nodes[8].args[0] = 7;
+    nodes[8].args[1] = 6;
+    
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ssn_outputTo(data, dataSize, nodes, nodeCount);
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    cout << "SwitchSingleNode: " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;
@@ -160,30 +205,6 @@ int main(int argc, char const **argv) {
   _checkData
   
   
-  //lightning
-  {
-    auto start_time = std::chrono::high_resolution_clock::now();
-    initLightning();
-  	auto end_time = std::chrono::high_resolution_clock::now();
-    auto compileTime = end_time - start_time;
-    
-    data[0] = 5;
-    start_time = std::chrono::high_resolution_clock::now();
-    runLightning(data, dataSize);
-  	end_time = std::chrono::high_resolution_clock::now();
-    cout << "lightning test output: " << data[0] << endl;
-    
-    cout << "lightning test : " << setfill(' ') << setw(intPrintWidth) <<
-    std::chrono::duration_cast<std::chrono::microseconds>(
-      end_time - start_time
-    ).count() << " microseconds, compiled in: " <<
-    std::chrono::duration_cast<std::chrono::microseconds>(
-      compileTime
-    ).count() << " microseconds" << endl;
-    
-    cleanupLighntning();
-  }
-  //_checkData
   
   return 0;
 }
