@@ -11,6 +11,7 @@ using std::setw;
 #include "SwitchBlockNode/node.hpp"
 #include "FnPtrSingleNode/node.hpp"
 #include "SwitchSingleNode/node.hpp"
+#include "SwitchSingleB/node.hpp"
 
 
 
@@ -198,6 +199,56 @@ int main(int argc, char const **argv) {
     ssn_outputTo(data, dataSize, nodes, nodeCount);
   	auto end_time = std::chrono::high_resolution_clock::now();
     cout << "SwitchSingleNode: " << setfill(' ') << setw(intPrintWidth) <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds" << endl;
+  }
+  _checkData
+  
+  
+  //SwitchSingleNodeB
+  {
+    /*
+    add         8
+      i         7
+      sub       6
+        mul     5
+          2     3
+          div   2
+            i   1
+            2   0
+        i       4
+    
+    0 1 2   3   4   5   6   7 8
+    2 i div 2   i   mul sub i add
+    2 2                          0
+      1                          1
+        0.5 0.5 0.5              2
+            2   2                3
+                1   1            4
+                    1            5
+                        0   0    6
+                            1    7
+                              1  8
+    */
+    const uint nodeCount = 9;
+    Iden nodes[nodeCount];
+    const uint litCount = 2;
+    num lits[litCount];
+    nodes[0] = I_lit;   lits [0] = 2;
+    nodes[1] = I_index;
+    nodes[2] = I_div;
+    nodes[3] = I_lit;   lits [1] = 2;
+    nodes[4] = I_index;
+    nodes[5] = I_mul;
+    nodes[6] = I_sub;
+    nodes[7] = I_index;
+    nodes[8] = I_add;
+    
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ssnb_outputTo(data, dataSize, nodes, nodeCount, lits, litCount);
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    cout << "SwitchSingleB   : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds" << endl;

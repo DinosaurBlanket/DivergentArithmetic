@@ -4,6 +4,7 @@ src = [
     "SwitchBlockNode/node.cpp",
     "FnPtrSingleNode/node.cpp",
     "SwitchSingleNode/node.cpp",
+    "SwitchSingleB/node.cpp",
     "perfTest.cpp"
 ]
 env.Program("perfTest", src, LIBS = [])

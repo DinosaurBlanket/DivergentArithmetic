@@ -4,7 +4,6 @@ using std::cout;
 using std::endl;
 #include "node.hpp"
 
-uint index;
 
 #define _theSwitch \
 switch (na[n].iden) {\
@@ -18,7 +17,7 @@ switch (na[n].iden) {\
 }
 
 void ssn_outputTo(num *data, uint dataSize, ssn_node *na, uint nodeCount) {
-  for (index = 0; index < dataSize; index++) {
+  for (uint index = 0; index < dataSize; index++) {
     num ret;
     uint n = 0;
     _theSwitch
