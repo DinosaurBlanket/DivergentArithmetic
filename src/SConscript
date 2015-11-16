@@ -1,14 +1,12 @@
 
-envA = Environment(CC = "gcc", CCFLAGS = "-Wall -O3")
-envA.Object("lightning/test.c")
-envB = Environment(CC = "g++", CCFLAGS = "-Wall -std=c++11 -O3")
+env = Environment(CC = "g++", CCFLAGS = "-Wall -std=c++11 -O3")
 src = [
     "FnPtrBlockNode/node.cpp",
     "SwitchBlockNode/node.cpp",
     "FnPtrSingleNode/node.cpp",
     "SwitchSingleNode/node.cpp",
     "SwitchSingleB/node.cpp",
-    envA.Object("lightning/test.c"),
+    "llvm/test.cpp",
     "perfTest.cpp"
 ]
-envB.Program("perfTest", src, LIBS = [File('/usr/local/lib/liblightning.a')])
+env.Program("perfTest", src, LIBS = [])

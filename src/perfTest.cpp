@@ -12,14 +12,15 @@ using std::setw;
 #include "FnPtrSingleNode/node.hpp"
 #include "SwitchSingleNode/node.hpp"
 #include "SwitchSingleB/node.hpp"
-#include "lightning/test.h"
-
+//#include "lightning/test.h"
+#include "llvm/test.hpp"
 
 
 num _add(num a, num b) {return a + b;}
 num _sub(num a, num b) {return a - b;}
 num _mul(num a, num b) {return a * b;}
 num _div(num a, num b) {return a / b;}
+
 
 enum switch_op {so_add, so_sub, so_mul, so_div};
 num everyFn(switch_op op, num a, num b) {
@@ -49,7 +50,7 @@ int main(int argc, char const **argv) {
   num data[dataSize];
   cout << "dataSize: " << dataSize << endl;
   for (uint i = 0; i < dataSize; i++) {data[i] = 0;}
-  
+
   //control
   {
   	auto start_time = std::chrono::high_resolution_clock::now();
@@ -62,7 +63,7 @@ int main(int argc, char const **argv) {
       end_time - start_time
     ).count() << " microseconds" << endl;
   }
-  
+
   //every fn ptr per iteration
   {
     //the conditions are to prevent the compiler from inlining
@@ -81,7 +82,7 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
+
   //switch per iteration
   {
     const switch_op a = argc > 1000 ? so_sub : so_add;
@@ -99,8 +100,8 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
-  
+
+
   //FnPtrBlockNode
   {
     std::vector<node_fb> divArgs_fb = {node_fb(nf_globalIndex), node_fb( 2)};
@@ -120,7 +121,7 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
+
   //SwitchBlockNode
   {
     std::vector<node_sb> divArgs = {node_sb(ni_globalIndex), node_sb( 2)};
@@ -140,7 +141,7 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
+
   //FnPtrSingleNode
   {
     std::vector<node_fs> divArgs_fs = {node_fs(fs_globalIndex), node_fs( 2)};
@@ -160,20 +161,9 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
+
   //SwitchSingleNode
   {
-    /*
-    add         8
-      i         7
-      sub       6
-        mul     5
-          2     3
-          div   2
-            i   1
-            2   0
-        i       4
-    */
     const uint nodeCount = 9;
     ssn_node nodes[nodeCount];
     nodes[0].ret  = 2;
@@ -195,7 +185,7 @@ int main(int argc, char const **argv) {
     nodes[8].iden = I_add;
     nodes[8].args[0] = 7;
     nodes[8].args[1] = 6;
-    
+
     auto start_time = std::chrono::high_resolution_clock::now();
     ssn_outputTo(data, dataSize, nodes, nodeCount);
   	auto end_time = std::chrono::high_resolution_clock::now();
@@ -205,8 +195,8 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
-  
+
+
   //SwitchSingleNodeB
   {
     /*
@@ -219,7 +209,7 @@ int main(int argc, char const **argv) {
             i   1
             2   0
         i       4
-    
+
     0 1 2   3   4   5   6   7 8
     2 i div 2   i   mul sub i add
     2 2                          0
@@ -245,7 +235,7 @@ int main(int argc, char const **argv) {
     nodes[6] = I_sub;
     nodes[7] = I_index;
     nodes[8] = I_add;
-    
+
     auto start_time = std::chrono::high_resolution_clock::now();
     ssnb_outputTo(data, dataSize, nodes, nodeCount, lits, litCount);
   	auto end_time = std::chrono::high_resolution_clock::now();
@@ -255,34 +245,56 @@ int main(int argc, char const **argv) {
     ).count() << " microseconds" << endl;
   }
   _checkData
-  
-  
+
+  /*
   //lightning
   {
     auto start_time = std::chrono::high_resolution_clock::now();
     initLightning();
   	auto end_time = std::chrono::high_resolution_clock::now();
     auto compileTime = end_time - start_time;
-    
-    data[0] = 5;
+
     start_time = std::chrono::high_resolution_clock::now();
     runLightning(data, dataSize);
   	end_time = std::chrono::high_resolution_clock::now();
-    
-    cout << "lightning test : " << setfill(' ') << setw(intPrintWidth) <<
+
+    cout << "lightning test  : " << setfill(' ') << setw(intPrintWidth) <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time
     ).count() << " microseconds, compiled in: " <<
     std::chrono::duration_cast<std::chrono::microseconds>(
       compileTime
     ).count() << " microseconds" << endl;
-    
+
     cleanupLighntning();
   }
   _checkData
+  */
   
   
+  //llvm
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    initLLVM();
+  	auto end_time = std::chrono::high_resolution_clock::now();
+    auto compileTime = end_time - start_time;
+
+    start_time = std::chrono::high_resolution_clock::now();
+    runLLVM(data, dataSize);
+  	end_time = std::chrono::high_resolution_clock::now();
+
+    cout << "LLVM test       : " << setfill(' ') << setw(intPrintWidth) <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time
+    ).count() << " microseconds, compiled in: " <<
+    std::chrono::duration_cast<std::chrono::microseconds>(
+      compileTime
+    ).count() << " microseconds" << endl;
+
+    cleanupLLVM();
+  }
+  _checkData
+  
+
   return 0;
 }
-
-
