@@ -12,8 +12,8 @@ using std::setw;
 #include "FnPtrSingleNode/node.hpp"
 #include "SwitchSingleNode/node.hpp"
 #include "SwitchSingleB/node.hpp"
-//#include "lightning/test.h"
-#include "llvm/test.hpp"
+#include "lightning/test.h"
+//#include "llvm/test.hpp"
 
 
 num _add(num a, num b) {return a + b;}
@@ -204,23 +204,11 @@ int main(int argc, char const **argv) {
       i         7
       sub       6
         mul     5
-          2     3
-          div   2
-            i   1
-            2   0
-        i       4
-
-    0 1 2   3   4   5   6   7 8
-    2 i div 2   i   mul sub i add
-    2 2                          0
-      1                          1
-        0.5 0.5 0.5              2
-            2   2                3
-                1   1            4
-                    1            5
-                        0   0    6
-                            1    7
-                              1  8
+          2     4
+          div   3
+            i   2
+            2   1
+        i       0
     */
     const uint nodeCount = 9;
     Iden nodes[nodeCount];
@@ -246,32 +234,13 @@ int main(int argc, char const **argv) {
   }
   _checkData
 
-  /*
+  
   //lightning
-  {
-    auto start_time = std::chrono::high_resolution_clock::now();
-    initLightning();
-  	auto end_time = std::chrono::high_resolution_clock::now();
-    auto compileTime = end_time - start_time;
-
-    start_time = std::chrono::high_resolution_clock::now();
-    runLightning(data, dataSize);
-  	end_time = std::chrono::high_resolution_clock::now();
-
-    cout << "lightning test  : " << setfill(' ') << setw(intPrintWidth) <<
-    std::chrono::duration_cast<std::chrono::microseconds>(
-      end_time - start_time
-    ).count() << " microseconds, compiled in: " <<
-    std::chrono::duration_cast<std::chrono::microseconds>(
-      compileTime
-    ).count() << " microseconds" << endl;
-
-    cleanupLighntning();
-  }
+  lightningTest(data, dataSize);
   _checkData
-  */
   
   
+  /*
   //llvm
   {
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -294,7 +263,7 @@ int main(int argc, char const **argv) {
     cleanupLLVM();
   }
   _checkData
-  
+  */
 
   return 0;
 }

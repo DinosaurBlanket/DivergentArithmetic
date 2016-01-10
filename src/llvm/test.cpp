@@ -34,7 +34,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-//g++ HowToUseJIT.cpp -o HowToUseJIT -Wall -g `llvm-config --cxxflags --ldflags --libs --system-libs` -lffi
+//g++ .cpp -o HowToUseJIT -Wall -g `llvm-config --cxxflags --ldflags --libs --system-libs` -lffi
 
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
@@ -55,10 +55,10 @@ using namespace llvm;
 
 Function        *FooF;
 ExecutionEngine *EE;
+LLVMContext Context;
 
 void initLLVM() {
   InitializeNativeTarget();
-  LLVMContext Context;
   
   // Create some module to put our function into it.
   std::unique_ptr<Module> Owner = make_unique<Module>("test", Context);

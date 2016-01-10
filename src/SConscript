@@ -1,3 +1,10 @@
+lightning = File("/usr/local/lib/liblightning.a")
+lenv = Environment(
+    CC = "gcc", 
+    CCFLAGS = "-std=gnu99 -Wall -Wno-missing-braces", 
+    LIBS = [lightning, "bfd", "iberty", "dl", "z"]
+)
+lenv.Object("lightning/test.c")
 
 env = Environment(CC = "g++", CCFLAGS = "-Wall -std=c++11 -O3")
 src = [
@@ -6,7 +13,7 @@ src = [
     "FnPtrSingleNode/node.cpp",
     "SwitchSingleNode/node.cpp",
     "SwitchSingleB/node.cpp",
-    "llvm/test.cpp",
+    "lightning/test.h",
     "perfTest.cpp"
 ]
-env.Program("perfTest", src, LIBS = [])
+env.Program("perfTest", src)
